@@ -5,7 +5,7 @@
         None,
         Start,
         Game,
-        Garage,
+        Fight,
         Reward
     }
 }

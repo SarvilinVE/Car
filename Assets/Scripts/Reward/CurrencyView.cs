@@ -1,35 +1,53 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using TMPro;
+﻿using TMPro;
 using UnityEngine;
 
 public class CurrencyView : MonoBehaviour
 {
     private const string GoldKey = nameof(GoldKey);
-    private const string Lollipop = nameof(Lollipop);
+    private const string LollipopKey = nameof(LollipopKey);
     public static CurrencyView Instance { get; private set; }
     [SerializeField]
     private TMP_Text _currentGold;
     [SerializeField]
     private TMP_Text _currentLollipop;
+
+    public int Gold
+    {
+        get => PlayerPrefs.GetInt(GoldKey, 0);
+        set => PlayerPrefs.SetInt(GoldKey, value);
+    }
+    public int Lollipop
+    {
+        get => PlayerPrefs.GetInt(LollipopKey, 0);
+        set => PlayerPrefs.SetInt(LollipopKey, value);
+    }
+
     private void Awake()
     {
-
+        Instance = this;
     }
+    private void Start()
+    {
+        RefreshText();
+    }
+
+    private void RefreshText()
+    {
+        _currentGold.text = Gold.ToString();
+        _currentLollipop.text = Lollipop.ToString();
+    }
+
     public void AddGold(int value)
     {
-        SaveNewCountInPlayerPrefs(GoldKey, value);
-        _currentGold.text = PlayerPrefs.GetInt(GoldKey, 0).ToString();
+        Gold += value;
+
+        RefreshText();
     }
-    public void AddDimond(int value)
+
+    public void AddLollipop(int value)
     {
-        SaveNewCountInPlayerPrefs(Lollipop, value);
-        _currentLollipop.text = PlayerPrefs.GetInt(Lollipop, 0).ToString();
-    }
-    private void SaveNewCountInPlayerPrefs(string key, int value)
-    {
-        var currentCount = PlayerPrefs.GetInt(key, 0);
-        var newCount = currentCount + value;
-        PlayerPrefs.SetInt(key, newCount);
+        Lollipop += value;
+
+        RefreshText();
     }
 }

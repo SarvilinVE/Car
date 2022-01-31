@@ -3,30 +3,26 @@ using Profile;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Events;
 using Object = UnityEngine.Object;
 
 public class DailyRewardController : BaseController
 {
-    private readonly ResourcePath _viewPath = new ResourcePath { PathResource = "Prefabs/RewardWindow" };
+    private CurrencyController _currencyController;
+
     private readonly ProfilePlayer _profilePlayer;
     private readonly DailyRewardView _dailyRewardView;
 
     private List<ContainerSlotRewardView> _slots = new List<ContainerSlotRewardView>();
     private bool _isGetReward;
-    public DailyRewardController(Transform placeForUi, ProfilePlayer profilePlayer)
+    public DailyRewardController(Transform placeForUi, ProfilePlayer profilePlayer, DailyRewardView dailyRewardView, CurrencyView currencyView)
     {
         _profilePlayer = profilePlayer;
-        _dailyRewardView = LoadView(placeForUi);
 
-        RefreshView();
-    }
-    public DailyRewardView LoadView(Transform placeForUi)
-    {
-        var dailyRewardView = Object.Instantiate(ResourceLoader.LoadPrefab(_viewPath), placeForUi, false);
-        AddGameObjects(dailyRewardView);
+        _dailyRewardView = Object.Instantiate(dailyRewardView, placeForUi);
+        AddGameObjects(_dailyRewardView.gameObject);
 
-        return dailyRewardView.GetComponent<DailyRewardView>();
+        _currencyController = new CurrencyController(placeForUi, currencyView);
+        AddController(_currencyController);
     }
     public void InitSlots()
     {
@@ -50,20 +46,42 @@ public class DailyRewardController : BaseController
 
     private void OnGame()
     {
+        _currencyController?.Dispose();
         _profilePlayer.CurrentState.Value = GameState.Game;
     }
     private void OnGetReward()
     {
-        if (_dailyRewardView.Rewards[_dailyRewardView.CurrentSlotInActive].RewardType == RewardType.Gold)
-            CurrencyView.Instance.AddGold(_dailyRewardView.Rewards[_dailyRewardView.CurrentSlotInActive].CountCurrency);
-        if(_dailyRewardView.Rewards[_dailyRewardView.CurrentSlotInActive].RewardType == RewardType.Lollipop)
-            CurrencyView.Instance.AddDimond(_dailyRewardView.Rewards[_dailyRewardView.CurrentSlotInActive].CountCurrency);
+        if (!_isGetReward)
+            return;
+
+        var reward = _dailyRewardView.Rewards[_dailyRewardView.CurrentSlotInActive];
+
+        switch (reward.RewardType)
+        {
+            case RewardType.Gold:
+                CurrencyView.Instance.AddGold(reward.CountCurrency);
+                break;
+            case RewardType.Lollipop:
+                CurrencyView.Instance.AddLollipop(reward.CountCurrency);
+                break;
+        }
+
+        _dailyRewardView.TimeGetReward = DateTime.UtcNow;
+        _dailyRewardView.CurrentSlotInActive = (_dailyRewardView.CurrentSlotInActive + 1) % _dailyRewardView.Rewards.Count;
+
+        RefreshRewardState();
     }
 
     private void SubscribesButtons()
     {
         _dailyRewardView.StartGameButton.onClick.AddListener(OnGame);
         _dailyRewardView.GetRewardButton.onClick.AddListener(OnGetReward);
+        _dailyRewardView.ResetButton.onClick.AddListener(ResetTimer);
+    }
+
+    private void ResetTimer()
+    {
+        PlayerPrefs.DeleteAll();
     }
 
     private IEnumerator RewardsStartUpdater()
@@ -109,7 +127,7 @@ public class DailyRewardController : BaseController
             {
                 var nextClaimTime = _dailyRewardView.TimeGetReward.Value.AddSeconds(_dailyRewardView.TimeCooldown);
                 var currentClimeCooldown = nextClaimTime - DateTime.UtcNow;
-                var timeGetReward = $"{currentClimeCooldown.Days:D2} : {currentClimeCooldown.Hours : D2} : {currentClimeCooldown.Minutes : D2} . {currentClimeCooldown.Seconds : D2}";
+                var timeGetReward = $"{currentClimeCooldown.Days:D2} : {currentClimeCooldown.Hours:D2} : {currentClimeCooldown.Minutes:D2} . {currentClimeCooldown.Seconds:D2}";
                 _dailyRewardView.TimerNewReward.text = timeGetReward; 
             }
         }
@@ -120,5 +138,12 @@ public class DailyRewardController : BaseController
         }
     }
 
-    
+    protected override void OnDispose()
+    {
+        _dailyRewardView.StartGameButton.onClick.RemoveAllListeners();
+        _dailyRewardView.GetRewardButton.onClick.RemoveAllListeners(); 
+        _dailyRewardView.ResetButton.onClick.RemoveAllListeners();
+
+        base.OnDispose();
+    }
 }

@@ -4,12 +4,22 @@ using UnityEngine;
 
 public class MainController : BaseController
 {
+    private readonly CurrencyView _currencyView;
+    private readonly DailyRewardView _dailyRewardView;
+    private readonly FightWindowView _fightWindowView;
+    private readonly StartFightView _startFightView;
+
     public MainController(Transform placeForUi, ProfilePlayer profilePlayer, 
-        List<ItemConfig> itemsConfig)
+        List<ItemConfig> itemsConfig, CurrencyView currencyView,DailyRewardView dailyRewardView, FightWindowView fightWindowView, StartFightView startFightView)
     {
         _profilePlayer = profilePlayer;
         _placeForUi = placeForUi;
         _itemsConfig = itemsConfig;
+
+        _currencyView = currencyView;
+        _dailyRewardView = dailyRewardView;
+        _fightWindowView = fightWindowView;
+        _startFightView = startFightView;
 
         OnChangeGameState(_profilePlayer.CurrentState.Value);
         profilePlayer.CurrentState.SubscribeOnChange(OnChangeGameState);
@@ -19,6 +29,11 @@ public class MainController : BaseController
     private GameController _gameController;
     private InventoryController _inventoryController;
     private DailyRewardController _dailyRewardController;
+    private FightWindowController _fightWindowController;
+    private StartFightController _startFightController;
+
+    
+
     private readonly Transform _placeForUi;
     private readonly ProfilePlayer _profilePlayer;
     private readonly List<ItemConfig> _itemsConfig;
@@ -38,20 +53,36 @@ public class MainController : BaseController
             case GameState.Start:
                 _mainMenuController = new MainMenuController(_placeForUi, _profilePlayer);
                 _gameController?.Dispose();
-                break;
-            case GameState.Reward:
-                _dailyRewardController = new DailyRewardController(_placeForUi, _profilePlayer);
-                _mainMenuController?.Dispose();
-                break;
-            case GameState.Game:
-                _inventoryController = new InventoryController(_itemsConfig, _placeForUi);
-
-                _gameController = new GameController(_profilePlayer);
-                _mainMenuController?.Dispose();
                 _dailyRewardController?.Dispose();
                 break;
-            case GameState.Garage:
+
+            case GameState.Reward:
+                _dailyRewardController = new DailyRewardController(_placeForUi, _profilePlayer, _dailyRewardView, _currencyView);
+                _dailyRewardController.RefreshView();
+                _mainMenuController?.Dispose();
                 break;
+
+            case GameState.Game:
+                _gameController = new GameController(_profilePlayer);
+
+                _inventoryController = new InventoryController(_itemsConfig, _placeForUi);
+
+                _startFightController = new StartFightController(_profilePlayer, _startFightView, _placeForUi);
+
+                _mainMenuController?.Dispose();
+                _dailyRewardController?.Dispose();
+                _fightWindowController?.Dispose();
+                break;
+
+            case GameState.Fight:
+                _fightWindowController = new FightWindowController(_placeForUi, _fightWindowView, _profilePlayer);
+                _fightWindowController.RefreshView();
+
+                _gameController?.Dispose();
+                _inventoryController?.Dispose();
+                _startFightController?.Dispose();
+                break;
+
             default:
                 AllClear();
                 break;
@@ -64,5 +95,7 @@ public class MainController : BaseController
         _mainMenuController?.Dispose();
         _gameController?.Dispose();
         _dailyRewardController?.Dispose();
+        _fightWindowController?.Dispose();
+        _startFightController?.Dispose();
     }
 }
