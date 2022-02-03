@@ -1,6 +1,7 @@
 ﻿using Profile;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 
 public class MainController : BaseController
 {
@@ -9,8 +10,10 @@ public class MainController : BaseController
     private readonly FightWindowView _fightWindowView;
     private readonly StartFightView _startFightView;
 
+    private readonly AssetReference _loadPrefab;
+
     public MainController(Transform placeForUi, ProfilePlayer profilePlayer, 
-        List<ItemConfig> itemsConfig, CurrencyView currencyView,DailyRewardView dailyRewardView, FightWindowView fightWindowView, StartFightView startFightView)
+        List<ItemConfig> itemsConfig, CurrencyView currencyView,DailyRewardView dailyRewardView, AssetReference loadPrefab, StartFightView startFightView)
     {
         _profilePlayer = profilePlayer;
         _placeForUi = placeForUi;
@@ -18,7 +21,7 @@ public class MainController : BaseController
 
         _currencyView = currencyView;
         _dailyRewardView = dailyRewardView;
-        _fightWindowView = fightWindowView;
+        _loadPrefab = loadPrefab;
         _startFightView = startFightView;
 
         OnChangeGameState(_profilePlayer.CurrentState.Value);
@@ -52,12 +55,15 @@ public class MainController : BaseController
         {
             case GameState.Start:
                 _mainMenuController = new MainMenuController(_placeForUi, _profilePlayer);
+
                 _gameController?.Dispose();
                 _dailyRewardController?.Dispose();
+                _fightWindowController?.Dispose();
                 break;
 
             case GameState.Reward:
                 _dailyRewardController = new DailyRewardController(_placeForUi, _profilePlayer, _dailyRewardView, _currencyView);
+
                 _dailyRewardController.RefreshView();
                 _mainMenuController?.Dispose();
                 break;
@@ -75,8 +81,7 @@ public class MainController : BaseController
                 break;
 
             case GameState.Fight:
-                _fightWindowController = new FightWindowController(_placeForUi, _fightWindowView, _profilePlayer);
-                _fightWindowController.RefreshView();
+                _fightWindowController = new FightWindowController(_placeForUi, _loadPrefab, _profilePlayer);
 
                 _gameController?.Dispose();
                 _inventoryController?.Dispose();

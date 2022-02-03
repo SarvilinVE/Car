@@ -1,10 +1,15 @@
-﻿using UnityEngine;
-using Profile;
+﻿using Profile;
+using UnityEngine;
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
 
 public class FightWindowController : BaseController
 {
     private FightWindowView _fightWindowView;
     private ProfilePlayer _profilePlayer;
+
+    private AssetReference _loadPrefab;
+    private AsyncOperationHandle<GameObject> _handle;
 
     private int _allCountMoneyPlayer;
     private int _allCountHealthPlayer;
@@ -16,14 +21,31 @@ public class FightWindowController : BaseController
 
     private Enemy _enemy;
 
-    public FightWindowController (Transform placeForUi, FightWindowView fightWindowView, ProfilePlayer profilePlayer)
+    public FightWindowController (Transform placeForUi, AssetReference loadPrefab, ProfilePlayer profilePlayer)
     {
         _profilePlayer = profilePlayer;
+        _loadPrefab = loadPrefab;
 
-        _fightWindowView = Object.Instantiate(fightWindowView, placeForUi);
-        AddGameObjects(_fightWindowView.gameObject);
+        LoadView(_loadPrefab, placeForUi);
     }
+    private async void LoadView(AssetReference loadPrefab, Transform placeForUi)
+    {
+        _handle = Addressables.InstantiateAsync(loadPrefab, placeForUi);
+        
+        await _handle.Task;
 
+        if(_handle.Status == AsyncOperationStatus.Succeeded)
+        {
+            _fightWindowView = _handle.Result.GetComponent<FightWindowView>();
+            AddGameObjects(_fightWindowView.gameObject);
+
+            RefreshView();
+        }
+        else
+        {
+            Debug.Log($"DOWNLOAD LEVEL ERROR!!!");
+        }
+    }
     public void RefreshView()
     {
         _enemy = new Enemy("AngryBird");
@@ -68,6 +90,8 @@ public class FightWindowController : BaseController
 
         _fightWindowView.FightButton.onClick.RemoveAllListeners();
         _fightWindowView.LeaveButton.onClick.RemoveAllListeners();
+
+        Addressables.ReleaseInstance(_handle);
 
         _money.Deattache(_enemy);
         _health.Deattache(_enemy);

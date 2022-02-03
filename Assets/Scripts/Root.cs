@@ -1,6 +1,7 @@
 ﻿using Profile;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 
 public class Root : MonoBehaviour
 {
@@ -10,10 +11,11 @@ public class Root : MonoBehaviour
     [SerializeField]
     private DailyRewardView _dailyRewardView;
     [SerializeField]
-    private FightWindowView _fightWindowView;
-    [SerializeField]
     private StartFightView _startFightView;
-
+    [Header ("Loader resource:")]
+    [SerializeField]
+    private AssetReference _loadPrefab;
+    [Header("Other settings:")]
     [SerializeField] 
     private Transform _placeForUi;
     
@@ -30,7 +32,7 @@ public class Root : MonoBehaviour
     {
         var profilePlayer = new ProfilePlayer(15f, _unityAdsTools);
         profilePlayer.CurrentState.Value = GameState.Start;
-        _mainController = new MainController(_placeForUi, profilePlayer, _itemConfigs, _currencyView, _dailyRewardView, _fightWindowView, _startFightView);
+        _mainController = new MainController(_placeForUi, profilePlayer, _itemConfigs, _currencyView, _dailyRewardView, _loadPrefab, _startFightView);
     }
 
     protected void OnDestroy()

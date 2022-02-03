@@ -426,6 +426,10 @@ MonoBehaviour:
     type: 3}
   _startFightView: {fileID: 8859219264934138940, guid: 2d8c767b562bf624b97dcdf12a16199e,
     type: 3}
+  _loadPrefab:
+    m_AssetGUID: 916788f80b18ec742bb4247bb24160ad
+    m_SubObjectName: 
+    m_SubObjectType: 
   _placeForUi: {fileID: 1903552}
   _unityAdsTools: {fileID: 1980575211}
   _itemConfigs:

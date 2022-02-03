@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: Packed Assets
+  m_EditorClassIdentifier: 
+  m_GroupName: Packed Assets
+  m_Data:
+    m_SerializedData: []
+  m_GUID: af46c9bf3040dec4783b518f5fdeb46d
+  m_SerializeEntries:
+  - m_GUID: 916788f80b18ec742bb4247bb24160ad
+    m_Address: Prefabs/FightWindows
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Prefabs
+    m_MainAsset: {fileID: 847977505209961108, guid: 916788f80b18ec742bb4247bb24160ad,
+      type: 3}
+    m_TargetAsset: {fileID: 847977505209961108, guid: 916788f80b18ec742bb4247bb24160ad,
+      type: 3}
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: 2d26346fbc582af489dfcdd94b45558d, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: ee68ea8db797d3e49aa2c09e8baecbdf, type: 2}
+    - {fileID: 11400000, guid: 9091f0801f0d56546af11f9c843fdb52, type: 2}
